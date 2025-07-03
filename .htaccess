@@ -1,0 +1,42 @@
+# Alapértelmezett index fájl beállítása
+DirectoryIndex index.html
+
+# Átirányítás a gyökérkönyvtárból az index.html-re
+RewriteEngine On
+
+# Ha a kért fájl nem létezik, irányítsuk az index.html-re
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^.*$ /index.html [L]
+
+# Alternatív megoldás: minden kérést az index.html-re irányít
+# RewriteRule ^$ /index.html [L]
+
+# Cache beállítások (opcionális)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# Tömörítés engedélyezése (opcionális)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Biztonság (opcionális)
+# Könyvtárlistázás tiltása
+Options -Indexes
+
+# MIME típusok beállítása
+AddType text/html .html
+AddType text/css .css
+AddType application/javascript .js
