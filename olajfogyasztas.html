@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Olajfogyasztás Követő</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+            background-color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.1);
+        }
+
+        .level-slider {
+            margin: 20px 0;
+        }
+
+        .level-display {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 10px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8efff 100%);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            padding: 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            background: #2a5298;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #1e3c72;
+        }
+
+        .tilt-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tilt-btn {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tilt-btn:hover {
+            background: #e8efff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tilt-btn.active {
+            background: #2a5298;
+            color: white;
+            border-color: #2a5298;
+            transform: scale(1.05);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(42, 82, 152, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #2a5298;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .records {
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .record {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #2a5298;
+            transition: all 0.3s ease;
+        }
+
+        .record:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .record-date {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .record-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8efff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #444;
+        }
+
+        .stat-value {
+            color: #2a5298;
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .record-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Olajfogyasztás Követő</h1>
+        
+        <div class="info-box">
+            ℹ️ Az adatok automatikusan mentődnek és töltődnek be a Google Sheets-ből. 
+            <a href="https://docs.google.com/spreadsheets/d/1raPCKy6qMLQ-t63dhuVJHVfrUlix_Mj5L-y3kxgGGIE/edit" target="_blank">Sheets megnyitása</a>
+        </div>
+        
+        <form id="oilForm">
+            <div class="form-group">
+                <label for="date">Dátum és idő</label>
+                <input type="datetime-local" id="date" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="km">Kilométeróra állás</label>
+                <input type="number" id="km" placeholder="pl. 125000" required>
+            </div>
+            
+            <div class="form-group level-slider">
+                <label for="level">Olajszint a nívópálcán</label>
+                <div class="level-display" id="levelDisplay">50%</div>
+                <input type="range" id="level" min="0" max="100" value="50" step="5">
+            </div>
+            
+            <div class="form-group">
+                <label>Autó dőlése</label>
+                <div class="tilt-buttons">
+                    <div class="tilt-btn" data-tilt="bal-hátra">↖️ Bal hátra</div>
+                    <div class="tilt-btn" data-tilt="hátra">⬆️ Hátra</div>
+                    <div class="tilt-btn" data-tilt="jobb-hátra">↗️ Jobb hátra</div>
+                    <div class="tilt-btn" data-tilt="balra">⬅️ Balra</div>
+                    <div class="tilt-btn active" data-tilt="vízszintes">⭕ Vízszintes</div>
+                    <div class="tilt-btn" data-tilt="jobbra">➡️ Jobbra</div>
+                    <div class="tilt-btn" data-tilt="bal-előre">↙️ Bal előre</div>
+                    <div class="tilt-btn" data-tilt="előre">⬇️ Előre</div>
+                    <div class="tilt-btn" data-tilt="jobb-előre">↘️ Jobb előre</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="added">Utántöltött olaj (liter)</label>
+                <input type="number" id="added" step="0.1" placeholder="pl. 0.5">
+            </div>
+            
+            <button type="submit" id="submitBtn">💾 Mérés mentése</button>
+        </form>
+        
+        <div id="statusDiv"></div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <h3 style="margin-bottom: 15px; color: #1e3c72;">📊 Statisztikák</h3>
+            <div id="statsContent"></div>
+        </div>
+        
+        <button onclick="loadRecords()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🔄 Adatok frissítése</button>
+        
+        <div class="records" id="records"></div>
+    </div>
+
+    <script>
+        // Google Apps Script Web App URL
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGEd9xDsRapN2bvHJHkkCinmnwKesEWCaJ7MQoMUYol5GK1s30b-aPpH31TkDmS1AY/exec';
+        
+        let selectedTilt = 'vízszintes';
+        let measurements = [];
+
+        // Inicializálás
+        function init() {
+            document.getElementById('date').value = new Date().toISOString().slice(0, 16);
+            
+            if (!WEB_APP_URL || WEB_APP_URL === 'https://script.google.com/macros/s/AKfycby.../exec') {
+                showStatus('❌ Kérlek állítsd be a WEB_APP_URL értéket a kódban!', 'error');
+                document.getElementById('statusDiv').innerHTML += `
+                    <div style="margin-top: 10px; text-align: left;">
+                        <strong>Telepítési lépések:</strong><br>
+                        1. Nyisd meg a Google Apps Script kódot<br>
+                        2. Deploy → New Deployment<br>
+                        3. Másold be a Web App URL-t a kódba
+                    </div>
+                `;
+                return;
+            }
+            
+            loadRecords();
+        }
+
+        // Olajszint slider
+        const levelSlider = document.getElementById('level');
+        const levelDisplay = document.getElementById('levelDisplay');
+        
+        levelSlider.addEventListener('input', (e) => {
+            levelDisplay.textContent = e.target.value + '%';
+        });
+
+        // Dőlés gombok
+        document.querySelectorAll('.tilt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tilt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTilt = btn.dataset.tilt;
+            });
+        });
+
+        // Form submit - Google Apps Script Web App használata
+        document.getElementById('oilForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '💾 Mentés...<span class="loading"></span>';
+            
+            const formData = {
+                date: document.getElementById('date').value,
+                km: document.getElementById('km').value,
+                level: document.getElementById('level').value,
+                tilt: selectedTilt,
+                added: document.getElementById('added').value || '0'
+            };
+            
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Fontos a CORS miatt
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                showStatus('✅ Mérés sikeresen mentve!', 'success');
+                
+                // Form reset
+                document.getElementById('added').value = '';
+                document.getElementById('date').value = new Date().toISOString().slice(0, 16);
+                
+                // Kis késleltetés után frissítjük az adatokat
+                setTimeout(() => {
+                    loadRecords();
+                }, 1000);
+                
+            } catch (error) {
+                showStatus('❌ Mentési hiba! ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '💾 Mérés mentése';
+            }
+        });
+
+        // Rekordok betöltése
+        async function loadRecords() {
+            showStatus('Adatok betöltése...<span class="loading"></span>', 'info');
+            
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    measurements = result.data;
+                    const lastRow = result.data.at(-1) || false;
+                    if (lastRow) {
+                      document.getElementById('km').value = lastRow.km;
+                    }
+                    displayRecords();
+                    updateStats();
+                    clearStatus();
+                } else {
+                    throw new Error(result.message || 'Ismeretlen hiba');
+                }
+            } catch (error) {
+                showStatus('❌ Betöltési hiba! ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        // Rekordok megjelenítése
+        function displayRecords() {
+            const recordsDiv = document.getElementById('records');
+            recordsDiv.innerHTML = '<h3 style="margin-bottom: 15px; color: #1e3c72;">📝 Korábbi mérések</h3>';
+            
+            if (measurements.length === 0) {
+                recordsDiv.innerHTML += '<p style="text-align: center; color: #666;">Még nincsenek mérések</p>';
+                return;
+            }
+            
+            const sortedMeasurements = [...measurements].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedMeasurements.forEach(record => {
+                const recordEl = document.createElement('div');
+                recordEl.className = 'record';
+                
+                const date = new Date(record.date);
+                const formattedDate = date.toLocaleDateString('hu-HU') + ' ' + 
+                                    date.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
+                
+                recordEl.innerHTML = `
+                    <div class="record-header">
+                        <span class="record-date">${formattedDate}</span>
+                    </div>
+                    <div class="record-details">
+                        <div class="detail-item">
+                            <span class="detail-label">📏 Km:</span>
+                            <span>${record.km.toLocaleString('hu-HU')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📊 Szint:</span>
+                            <span>${record.level}%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">📐 Dőlés:</span>
+                            <span>${record.tilt}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">🛢️ Töltve:</span>
+                            <span>${record.added} L</span>
+                        </div>
+                    </div>
+                `;
+                
+                recordsDiv.appendChild(recordEl);
+            });
+        }
+
+        // Statisztikák frissítése
+        function updateStats() {
+            if (measurements.length < 2) {
+                document.getElementById('stats').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('stats').style.display = 'block';
+            const statsContent = document.getElementById('statsContent');
+            
+            const totalAdded = measurements.reduce((sum, m) => sum + m.added, 0);
+            const kms = measurements.map(m => m.km).filter(km => km > 0);
+            const firstKm = Math.min(...kms);
+            const lastKm = Math.max(...kms);
+            const kmDiff = lastKm - firstKm;
+            const consumption = kmDiff > 0 ? (totalAdded / kmDiff * 1000).toFixed(2) : 0;
+            
+            statsContent.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">Összes utántöltés:</span>
+                    <span class="stat-value">${totalAdded.toFixed(1)} L</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Megtett távolság:</span>
+                    <span class="stat-value">${kmDiff.toLocaleString('hu-HU')} km</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Átlag fogyasztás:</span>
+                    <span class="stat-value">${consumption} L/1000km</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Mérések száma:</span>
+                    <span class="stat-value">${measurements.length} db</span>
+                </div>
+            `;
+        }
+
+        // Státusz megjelenítése
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusDiv');
+            statusDiv.className = 'status ' + type;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+        }
+
+        // Státusz törlése
+        function clearStatus() {
+            const statusDiv = document.getElementById('statusDiv');
+            statusDiv.style.display = 'none';
+        }
+
+        // Inicializálás az oldal betöltésekor
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
