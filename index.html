@@ -361,7 +361,6 @@
         <div id="mainSection" class="hidden">
             <div class="info-box">
                 ℹ️ Az adatok automatikusan mentődnek és töltődnek be a Google Sheets-ből. 
-                <span id="sheetsLink"></span>
                 <button onclick="showSettings()" style="background: #6c757d; padding: 5px 10px; font-size: 14px; margin-top: 5px;">⚙️ Beállítások</button>
             </div>
             
@@ -438,11 +437,6 @@
                 document.getElementById('setupSection').classList.add('hidden');
                 document.getElementById('mainSection').classList.remove('hidden');
                 
-                // Sheets link frissítése ha van Sheet ID
-                if (SHEET_ID) {
-                    document.getElementById('sheetsLink').innerHTML = 
-                        `<a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank">Sheets megnyitása</a>`;
-                }
                 
                 // Adatok betöltése
                 loadRecords();
@@ -576,11 +570,7 @@
                     // Sheet ID mentése ha a válasz tartalmazza
                     if (result.sheetId) {
                         SHEET_ID = result.sheetId;
-                        localStorage.setItem('oilTrackerSheetId', SHEET_ID);
-                        
-                        // Sheets link frissítése
-                        document.getElementById('sheetsLink').innerHTML = 
-                            `<a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank">Sheets megnyitása</a>`;
+                        localStorage.setItem('oilTrackerSheetId', SHEET_ID);                        
                     }
                     
                     const lastRow = result.data.at(-1) || false;
