@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Olajfogyasztás Követő</title>
+    <title>Olajfogyasztás Követő v1.2</title>
     <style>
         * {
             box-sizing: border-box;
@@ -343,7 +343,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚗 Olajfogyasztás Követő</h1>
+        <h1>🚗 Olajfogyasztás Követő v1.2</h1>
         
         <div id="setupSection" class="setup-box">
             <h3>⚙️ Első használat - Beállítás szükséges</h3>
@@ -468,14 +468,6 @@
             WEB_APP_URL = urlInput;
             localStorage.setItem('oilTrackerWebAppUrl', WEB_APP_URL);
             
-            // Sheet ID kinyerése az URL-ből (ha lehetséges)
-            // Megjegyzés: Ez nem mindig működik, de megpróbáljuk
-            const sheetIdMatch = urlInput.match(/\/d\/([a-zA-Z0-9-_]+)/);
-            if (sheetIdMatch) {
-                SHEET_ID = sheetIdMatch[1];
-                localStorage.setItem('oilTrackerSheetId', SHEET_ID);
-            }
-            
             showStatus('✅ Beállítások mentve!', 'success');
             
             // Váltás a főoldalra
@@ -580,6 +572,17 @@
                 
                 if (result.status === 'success') {
                     measurements = result.data || [];
+                    
+                    // Sheet ID mentése ha a válasz tartalmazza
+                    if (result.sheetId) {
+                        SHEET_ID = result.sheetId;
+                        localStorage.setItem('oilTrackerSheetId', SHEET_ID);
+                        
+                        // Sheets link frissítése
+                        document.getElementById('sheetsLink').innerHTML = 
+                            `<a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank">Sheets megnyitása</a>`;
+                    }
+                    
                     const lastRow = result.data.at(-1) || false;
                     if (lastRow) {
                         document.getElementById('km').value = lastRow.km;
