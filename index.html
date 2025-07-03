@@ -37,6 +37,19 @@
             font-size: 24px;
         }
 
+        .setup-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .setup-box h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
         .info-box {
             background: #f0f4ff;
             padding: 15px;
@@ -58,7 +71,7 @@
             font-size: 14px;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
@@ -66,9 +79,15 @@
             font-size: 16px;
             transition: all 0.3s ease;
             background-color: #f8f9fa;
+            font-family: inherit;
         }
 
-        input:focus, select:focus {
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #2a5298;
             background-color: #fff;
@@ -303,6 +322,10 @@
             font-weight: 500;
         }
 
+        .hidden {
+            display: none !important;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 15px;
@@ -322,67 +345,83 @@
     <div class="container">
         <h1>🚗 Olajfogyasztás Követő</h1>
         
-        <div class="info-box">
-            ℹ️ Az adatok automatikusan mentődnek és töltődnek be a Google Sheets-ből. 
-            <a href="https://docs.google.com/spreadsheets/d/1raPCKy6qMLQ-t63dhuVJHVfrUlix_Mj5L-y3kxgGGIE/edit" target="_blank">Sheets megnyitása</a>
+        <div id="setupSection" class="setup-box">
+            <h3>⚙️ Első használat - Beállítás szükséges</h3>
+            <div class="form-group">
+                <label for="webAppUrl">Google Apps Script Web App URL:</label>
+                <textarea id="webAppUrl" placeholder="https://script.google.com/macros/s/AKfycby.../exec"></textarea>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Ez az URL kapcsolja össze az alkalmazást a Google Sheets-eddel
+                </small>
+            </div>
+            <button onclick="saveWebAppUrl()">💾 URL mentése és folytatás</button>
+            <button onclick="resetSettings()" style="background: #6c757d; margin-top: 5px;">🔄 Beállítások törlése</button>
         </div>
         
-        <form id="oilForm">
-            <div class="form-group">
-                <label for="date">Dátum és idő</label>
-                <input type="datetime-local" id="date" required>
+        <div id="mainSection" class="hidden">
+            <div class="info-box">
+                ℹ️ Az adatok automatikusan mentődnek és töltődnek be a Google Sheets-ből. 
+                <span id="sheetsLink"></span>
+                <button onclick="showSettings()" style="background: #6c757d; padding: 5px 10px; font-size: 14px; margin-top: 5px;">⚙️ Beállítások</button>
             </div>
             
-            <div class="form-group">
-                <label for="km">Kilométeróra állás</label>
-                <input type="number" id="km" placeholder="pl. 125000" required>
-            </div>
-            
-            <div class="form-group level-slider">
-                <label for="level">Olajszint a nívópálcán</label>
-                <div class="level-display" id="levelDisplay">50%</div>
-                <input type="range" id="level" min="0" max="100" value="50" step="5">
-            </div>
-            
-            <div class="form-group">
-                <label>Autó dőlése</label>
-                <div class="tilt-buttons">
-                    <div class="tilt-btn" data-tilt="bal-hátra">↖️ Bal hátra</div>
-                    <div class="tilt-btn" data-tilt="hátra">⬆️ Hátra</div>
-                    <div class="tilt-btn" data-tilt="jobb-hátra">↗️ Jobb hátra</div>
-                    <div class="tilt-btn" data-tilt="balra">⬅️ Balra</div>
-                    <div class="tilt-btn active" data-tilt="vízszintes">⭕ Vízszintes</div>
-                    <div class="tilt-btn" data-tilt="jobbra">➡️ Jobbra</div>
-                    <div class="tilt-btn" data-tilt="bal-előre">↙️ Bal előre</div>
-                    <div class="tilt-btn" data-tilt="előre">⬇️ Előre</div>
-                    <div class="tilt-btn" data-tilt="jobb-előre">↘️ Jobb előre</div>
+            <form id="oilForm">
+                <div class="form-group">
+                    <label for="date">Dátum és idő</label>
+                    <input type="datetime-local" id="date" required>
                 </div>
+                
+                <div class="form-group">
+                    <label for="km">Kilométeróra állás</label>
+                    <input type="number" id="km" placeholder="pl. 125000" required>
+                </div>
+                
+                <div class="form-group level-slider">
+                    <label for="level">Olajszint a nívópálcán</label>
+                    <div class="level-display" id="levelDisplay">50%</div>
+                    <input type="range" id="level" min="0" max="100" value="50" step="5">
+                </div>
+                
+                <div class="form-group">
+                    <label>Autó dőlése</label>
+                    <div class="tilt-buttons">
+                        <div class="tilt-btn" data-tilt="bal-hátra">↖️ Bal hátra</div>
+                        <div class="tilt-btn" data-tilt="hátra">⬆️ Hátra</div>
+                        <div class="tilt-btn" data-tilt="jobb-hátra">↗️ Jobb hátra</div>
+                        <div class="tilt-btn" data-tilt="balra">⬅️ Balra</div>
+                        <div class="tilt-btn active" data-tilt="vízszintes">⭕ Vízszintes</div>
+                        <div class="tilt-btn" data-tilt="jobbra">➡️ Jobbra</div>
+                        <div class="tilt-btn" data-tilt="bal-előre">↙️ Bal előre</div>
+                        <div class="tilt-btn" data-tilt="előre">⬇️ Előre</div>
+                        <div class="tilt-btn" data-tilt="jobb-előre">↘️ Jobb előre</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="added">Utántöltött olaj (liter)</label>
+                    <input type="number" id="added" step="0.1" placeholder="pl. 0.5">
+                </div>
+                
+                <button type="submit" id="submitBtn">💾 Mérés mentése</button>
+            </form>
+            
+            <div id="statusDiv"></div>
+            
+            <div class="stats" id="stats" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #1e3c72;">📊 Statisztikák</h3>
+                <div id="statsContent"></div>
             </div>
             
-            <div class="form-group">
-                <label for="added">Utántöltött olaj (liter)</label>
-                <input type="number" id="added" step="0.1" placeholder="pl. 0.5">
-            </div>
+            <button onclick="loadRecords()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🔄 Adatok frissítése</button>
             
-            <button type="submit" id="submitBtn">💾 Mérés mentése</button>
-        </form>
-        
-        <div id="statusDiv"></div>
-        
-        <div class="stats" id="stats" style="display: none;">
-            <h3 style="margin-bottom: 15px; color: #1e3c72;">📊 Statisztikák</h3>
-            <div id="statsContent"></div>
+            <div class="records" id="records"></div>
         </div>
-        
-        <button onclick="loadRecords()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🔄 Adatok frissítése</button>
-        
-        <div class="records" id="records"></div>
     </div>
 
     <script>
-        // Google Apps Script Web App URL
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGEd9xDsRapN2bvHJHkkCinmnwKesEWCaJ7MQoMUYol5GK1s30b-aPpH31TkDmS1AY/exec';
-        
+        // Változók
+        let WEB_APP_URL = '';
+        let SHEET_ID = '';
         let selectedTilt = 'vízszintes';
         let measurements = [];
 
@@ -390,20 +429,78 @@
         function init() {
             document.getElementById('date').value = new Date().toISOString().slice(0, 16);
             
-            if (!WEB_APP_URL || WEB_APP_URL === 'https://script.google.com/macros/s/AKfycby.../exec') {
-                showStatus('❌ Kérlek állítsd be a WEB_APP_URL értéket a kódban!', 'error');
-                document.getElementById('statusDiv').innerHTML += `
-                    <div style="margin-top: 10px; text-align: left;">
-                        <strong>Telepítési lépések:</strong><br>
-                        1. Nyisd meg a Google Apps Script kódot<br>
-                        2. Deploy → New Deployment<br>
-                        3. Másold be a Web App URL-t a kódba
-                    </div>
-                `;
+            // Web App URL betöltése localStorage-ból
+            WEB_APP_URL = localStorage.getItem('oilTrackerWebAppUrl') || '';
+            SHEET_ID = localStorage.getItem('oilTrackerSheetId') || '';
+            
+            if (WEB_APP_URL) {
+                // Ha van mentett URL, elrejtjük a beállítást és megjelenítjük a főoldalt
+                document.getElementById('setupSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+                
+                // Sheets link frissítése ha van Sheet ID
+                if (SHEET_ID) {
+                    document.getElementById('sheetsLink').innerHTML = 
+                        `<a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit" target="_blank">Sheets megnyitása</a>`;
+                }
+                
+                // Adatok betöltése
+                loadRecords();
+            }
+        }
+
+        // Web App URL mentése
+        function saveWebAppUrl() {
+            const urlInput = document.getElementById('webAppUrl').value.trim();
+            
+            if (!urlInput) {
+                showStatus('❌ Kérlek add meg a Web App URL-t!', 'error');
                 return;
             }
             
-            loadRecords();
+            // URL validálás
+            if (!urlInput.startsWith('https://script.google.com/macros/s/')) {
+                showStatus('❌ Érvénytelen URL! A Web App URL így kezdődik: https://script.google.com/macros/s/', 'error');
+                return;
+            }
+            
+            // URL mentése
+            WEB_APP_URL = urlInput;
+            localStorage.setItem('oilTrackerWebAppUrl', WEB_APP_URL);
+            
+            // Sheet ID kinyerése az URL-ből (ha lehetséges)
+            // Megjegyzés: Ez nem mindig működik, de megpróbáljuk
+            const sheetIdMatch = urlInput.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (sheetIdMatch) {
+                SHEET_ID = sheetIdMatch[1];
+                localStorage.setItem('oilTrackerSheetId', SHEET_ID);
+            }
+            
+            showStatus('✅ Beállítások mentve!', 'success');
+            
+            // Váltás a főoldalra
+            setTimeout(() => {
+                document.getElementById('setupSection').classList.add('hidden');
+                document.getElementById('mainSection').classList.remove('hidden');
+                init();
+            }, 1000);
+        }
+
+        // Beállítások megjelenítése
+        function showSettings() {
+            document.getElementById('setupSection').classList.remove('hidden');
+            document.getElementById('webAppUrl').value = WEB_APP_URL;
+        }
+
+        // Beállítások törlése
+        function resetSettings() {
+            if (confirm('Biztosan törölni szeretnéd a beállításokat?')) {
+                localStorage.removeItem('oilTrackerWebAppUrl');
+                localStorage.removeItem('oilTrackerSheetId');
+                WEB_APP_URL = '';
+                SHEET_ID = '';
+                location.reload();
+            }
         }
 
         // Olajszint slider
@@ -423,7 +520,7 @@
             });
         });
 
-        // Form submit - Google Apps Script Web App használata
+        // Form submit
         document.getElementById('oilForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -442,7 +539,7 @@
             try {
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Fontos a CORS miatt
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -455,7 +552,7 @@
                 document.getElementById('added').value = '';
                 document.getElementById('date').value = new Date().toISOString().slice(0, 16);
                 
-                // Kis késleltetés után frissítjük az adatokat
+                // Adatok frissítése
                 setTimeout(() => {
                     loadRecords();
                 }, 1000);
@@ -470,6 +567,11 @@
 
         // Rekordok betöltése
         async function loadRecords() {
+            if (!WEB_APP_URL) {
+                showStatus('❌ Nincs beállítva Web App URL!', 'error');
+                return;
+            }
+            
             showStatus('Adatok betöltése...<span class="loading"></span>', 'info');
             
             try {
@@ -477,10 +579,10 @@
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    measurements = result.data;
+                    measurements = result.data || [];
                     const lastRow = result.data.at(-1) || false;
                     if (lastRow) {
-                      document.getElementById('km').value = lastRow.km;
+                        document.getElementById('km').value = lastRow.km;
                     }
                     displayRecords();
                     updateStats();
@@ -554,8 +656,8 @@
             document.getElementById('stats').style.display = 'block';
             const statsContent = document.getElementById('statsContent');
             
-            const totalAdded = measurements.reduce((sum, m) => sum + m.added, 0);
-            const kms = measurements.map(m => m.km).filter(km => km > 0);
+            const totalAdded = measurements.reduce((sum, m) => sum + parseFloat(m.added) || 0, 0);
+            const kms = measurements.map(m => parseInt(m.km)).filter(km => km > 0);
             const firstKm = Math.min(...kms);
             const lastKm = Math.max(...kms);
             const kmDiff = lastKm - firstKm;
